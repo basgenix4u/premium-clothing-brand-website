@@ -2,7 +2,7 @@
 
 Legend: `[ ]` Pending · `[~]` In Progress (only one at a time) · `[x]` Completed
 
-Current stage: **Stage 3 — Backend (in progress)**. The only `[~]` item is the Stage 3 sign-off.
+Current stage: **Stage 3 — Backend, awaiting owner approval**. The only `[~]` item is the approval gate.
 
 ## Stage 0: Repository and baseline
 
@@ -62,8 +62,8 @@ Done in this stage so far: Prisma schema, migrations, seed, readiness, CSRF and 
 - [ ] Unit tests: stock and validation rules for bag and checkout services
 - [x] Integration tests for the implemented routes (catalogue, auth, bag, checkout, orders, platform) against PostgreSQL
 - [ ] Integration tests for wishlist, reviews, newsletter, contact, admin and payments
-- [~] Stage 3 sign-off: all tests green, zero TS, lint and build errors, docs and board updated, pushed to `main`
-- [ ] Approval gate for Stage 3 (wait for owner approval)
+- [x] Stage 3 sign-off: all tests green, zero TS, lint and build errors, docs and board updated, pushed to `main` (commit `35c7b23`)
+- [~] Approval gate for Stage 3 (waiting for owner approval; open points are in ARCHITECTURE §10.3 and §10.5)
 
 ## Stage 4: Frontend
 
