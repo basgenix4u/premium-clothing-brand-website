@@ -2,7 +2,7 @@
 
 Legend: `[ ]` Pending · `[~]` In Progress (only one at a time) · `[x]` Completed
 
-Current stage: **Stage 3 — Backend, awaiting owner approval**. The only `[~]` item is the approval gate.
+Current stage: **Stage 4 — Frontend (started)**. Stage 3 is approved.
 
 ## Stage 0: Repository and baseline
 
@@ -36,7 +36,7 @@ Done in this stage so far: Prisma schema, migrations, seed, readiness, CSRF and 
 
 - [x] Prisma schema and first migration, plus a CHECK-constraint migration (`docs/ARCHITECTURE.md` §5 and §10.1)
 - [ ] PostgreSQL in Docker Compose for local development (the Compose file arrives in Stage 5; a local PostgreSQL is used now)
-- [x] Seed script that imports the catalogue: 18 products, 37 variants, 7 categories, 4 looks, 3 articles, 6 regions, 3 promo codes (the earlier "37 products" was a miscount)
+- [x] Seed script that imports the catalogue: 18 products, 37 variants, 7 categories, 4 looks, 3 articles, 6 regions, 2 promo codes (CIRCLE15 deferred) (the earlier "37 products" was a miscount)
 - [x] Readiness endpoint `GET /api/v1/health/ready` (database check)
 - [x] CSRF double-submit tokens and origin checks on unsafe methods
 - [x] RFC 9457 errors for handled failures and for unknown `/api` paths (catch-all route)
@@ -50,7 +50,7 @@ Done in this stage so far: Prisma schema, migrations, seed, readiness, CSRF and 
 - [x] Catalogue API: categories, products with filters, sort, search, and offset cursors
 - [ ] Catalogue API: looks, journal and size guides
 - [x] Bag API: guest cookie bag, server-side totals, promo validation, shipping selection, merge on sign-in
-- [ ] Decision: CIRCLE15 is described as a members offer, but there is no membership model (ARCHITECTURE §10.3)
+- [x] Decision: CIRCLE15 is not seeded until a membership model exists (owner decision, ARCHITECTURE §10.3)
 - [ ] Wishlist module
 - [x] Checkout: idempotent order creation (`Idempotency-Key`) with transactional stock reservation and a concurrency test
 - [ ] Checkout: release reserved stock for unpaid orders (scheduled job)
@@ -63,7 +63,7 @@ Done in this stage so far: Prisma schema, migrations, seed, readiness, CSRF and 
 - [x] Integration tests for the implemented routes (catalogue, auth, bag, checkout, orders, platform) against PostgreSQL
 - [ ] Integration tests for wishlist, reviews, newsletter, contact, admin and payments
 - [x] Stage 3 sign-off: all tests green, zero TS, lint and build errors, docs and board updated, pushed to `main` (commit `35c7b23`)
-- [~] Approval gate for Stage 3 (waiting for owner approval; open points are in ARCHITECTURE §10.3 and §10.5)
+- [x] Approval gate for Stage 3 (approved by owner; CIRCLE15 deferred and duplicate sign-up kept at 409, per ARCHITECTURE §10.3 and §10.5)
 
 ## Stage 4: Frontend
 

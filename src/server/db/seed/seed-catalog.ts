@@ -103,6 +103,12 @@ export type SeedSummary = {
   promoCodes: number;
 };
 
+/**
+ * Offers present in the prototype whose rules are not built yet. CIRCLE15 is for Circle
+ * members, but there is no membership model, so it stays inactive until one exists.
+ */
+export const DEFERRED_PROMO_CODES: readonly string[] = ["CIRCLE15"];
+
 const toMinor = (amount: number): number => Math.round(amount * 100);
 const FIXED_PUBLISH_DATE = new Date("2026-01-15T00:00:00.000Z");
 
@@ -175,7 +181,10 @@ export async function seedCatalog(
     }
   }
 
-  for (const promo of snapshot.promoRules) {
+  const activePromos = snapshot.promoRules.filter(
+    (promo) => !DEFERRED_PROMO_CODES.includes(promo.code),
+  );
+  for (const promo of activePromos) {
     const kind = promo.kind.toUpperCase() as "PERCENT" | "FIXED" | "SHIPPING";
     const value = kind === "FIXED" ? toMinor(promo.value) : Math.round(promo.value);
     const data = {
@@ -190,6 +199,12 @@ export async function seedCatalog(
       update: data,
     });
   }
+
+  // Databases seeded before an offer was deferred keep its row, so deactivate it rather than delete it.
+  await db.promoCode.updateMany({
+    where: { code: { in: [...DEFERRED_PROMO_CODES] } },
+    data: { isActive: false },
+  });
 
   let variantCount = 0;
   for (const product of snapshot.products) {
@@ -290,6 +305,6 @@ export async function seedCatalog(
     looks: snapshot.looks.length,
     articles: snapshot.articles.length,
     regions: snapshot.regions.length,
-    promoCodes: snapshot.promoRules.length,
+    promoCodes: activePromos.length,
   };
 }

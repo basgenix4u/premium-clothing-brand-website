@@ -129,9 +129,16 @@ describe("bag (cart) API", () => {
     expect(body.totals.total.amountMinor).toBe(42_000 - 4200);
   });
 
-  it("rejects unknown promo codes and codes whose threshold is not met", async () => {
+  it("rejects unknown codes, unmet minimums and codes not yet offered", async () => {
     const client = new ApiClient(csrf);
-    await addToBag(client, "the-line-pant-ink", "M", 1);
+    // FREESHIP needs $150 of goods, so the bag must hold a piece priced below that.
+    const cheap = await db().productVariant.findFirstOrThrow({
+      where: { isActive: true, product: { priceMinor: { lt: 15_000 } } },
+      include: { product: true, sizes: true },
+    });
+    const size = cheap.sizes.find((row) => row.stock > 0)?.size ?? "";
+    await addToBag(client, cheap.sku, size, 1);
+
     const unknown = await client.send(promoRoute.PUT, {
       method: "PUT",
       path: "/api/v1/cart/promo",
@@ -142,13 +149,21 @@ describe("bag (cart) API", () => {
     const threshold = await client.send(promoRoute.PUT, {
       method: "PUT",
       path: "/api/v1/cart/promo",
-      body: { code: "CIRCLE15" },
+      body: { code: "FREESHIP" },
     });
-    // The bag is $180 (18,000 minor units) against a 300 minimum, so CIRCLE15 must be refused.
     expect(threshold.status).toBe(422);
     expect(await json(threshold)).toMatchObject({
       detail: "Add more to your bag to use this code.",
     });
+
+    // CIRCLE15 is not seeded until a membership model exists, so the storefront does not recognise it.
+    const deferred = await client.send(promoRoute.PUT, {
+      method: "PUT",
+      path: "/api/v1/cart/promo",
+      body: { code: "CIRCLE15" },
+    });
+    expect(deferred.status).toBe(422);
+    expect(await json(deferred)).toMatchObject({ detail: "That code is not recognised." });
   });
 
   it("adds shipping to the total once a method is chosen", async () => {

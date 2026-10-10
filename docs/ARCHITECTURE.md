@@ -351,8 +351,8 @@ These decisions were made while building the backend. Where the implementation d
 - **Guest bag:** an opaque, random, httpOnly cookie `vellum_guest`, valid for 30 days. The server stores only its SHA-256 hash.
 - **Merge on sign-in:** guest lines move into the customer's cart, capped by live stock and the per-line maximum. A guest promo code and shipping choice carry over when the customer has none.
 - **Totals** are computed only on the server. The client sends variant SKUs, sizes, and quantities. Limits: 10 per size line, 30 distinct lines.
-- **Promo rules** come from the seed: WELCOME10 (10% off), CIRCLE15 (15% off, minimum $300), and FREESHIP (free shipping, minimum $150).
-- **Open point:** CIRCLE15 is described as a Circle members offer, but the schema has no membership concept, so any shopper can use it. A product decision is needed before launch.
+- **Promo rules** come from the seed: WELCOME10 (10% off) and FREESHIP (free shipping, minimum $150).
+- **CIRCLE15** (15% off over $300 for Circle members) is not seeded. The schema has no membership model, so the code would otherwise reach every shopper. The owner decided on this in Stage 3 review. The seed does not create the code, so the storefront answers "not recognised". Any database seeded earlier has the row deactivated, not deleted, so existing foreign keys stay valid.
 
 ### 10.4 Checkout and orders
 
@@ -369,7 +369,7 @@ These decisions were made while building the backend. Where the implementation d
 - **Session:** the cookie `vellum_session` is httpOnly, `SameSite=Lax`, and valid for 7 days. Its token is 32 random bytes, and only the SHA-256 hash is stored.
 - **Rotation:** each sign-in issues a new token. The previous session, if any, is not revoked. Full rotation (revoking other sessions) comes with password reset.
 - **Rate limits:** login allows 10 attempts per IP and email pair per 15 minutes. Registration allows 5 per IP per hour. Limits apply only when `TRUST_PROXY=true`. Otherwise all clients share a single bucket.
-- **Account enumeration (decision for owner review):** a duplicate sign-up returns 409 with a generic message, but the status code still reveals that the email exists. The alternative is to return 201 and email the account holder. Choose before launch.
+- **Account enumeration (owner decision: keep 409):** a duplicate sign-up returns 409 with a generic message. The status code still reveals that the email is registered. Revisit before launch if enumeration becomes a concern. The alternative is to return 201 and email the account holder.
 
 ### 10.6 Request security and errors
 
