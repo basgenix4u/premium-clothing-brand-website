@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { ConfigError, parseEnv } from "@/server/config/env";
+import { ConfigError, isSecureOrigin, parseEnv } from "@/server/config/env";
 
 describe("parseEnv", () => {
   it("applies safe defaults when variables are absent", () => {
-    const env = parseEnv({});
-    expect(env).toEqual({
+    expect(parseEnv({})).toEqual({
       NODE_ENV: "development",
       APP_URL: "http://localhost:3000",
       APP_VERSION: "0.1.0",
       LOG_LEVEL: "info",
+      TRUST_PROXY: "false",
     });
   });
 
@@ -36,7 +36,13 @@ describe("parseEnv", () => {
     expect((caught as Error).message).not.toContain(secretLookalike);
   });
 
-  it("rejects an unknown log level", () => {
+  it("rejects an unknown log level and an invalid proxy flag", () => {
     expect(() => parseEnv({ LOG_LEVEL: "verbose" })).toThrow(ConfigError);
+    expect(() => parseEnv({ TRUST_PROXY: "yes" })).toThrow(ConfigError);
+  });
+
+  it("detects secure origins for cookie flags", () => {
+    expect(isSecureOrigin(parseEnv({ APP_URL: "https://vellum.example" }))).toBe(true);
+    expect(isSecureOrigin(parseEnv({ APP_URL: "http://localhost:3000" }))).toBe(false);
   });
 });

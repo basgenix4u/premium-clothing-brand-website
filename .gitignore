@@ -13,6 +13,9 @@ coverage/
 playwright-report/
 test-results/
 
+# generated Prisma client (recreated by `prisma generate`)
+src/server/db/generated/
+
 # environment and secrets
 .env
 .env.*

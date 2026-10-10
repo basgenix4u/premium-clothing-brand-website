@@ -5,6 +5,7 @@ export type ProblemDetails = {
   status: number;
   detail?: string;
   instance?: string;
+  requestId?: string;
 };
 
 export const problem = (status: number, title: string, detail?: string): ProblemDetails => ({

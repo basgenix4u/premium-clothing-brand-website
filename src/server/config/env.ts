@@ -8,6 +8,8 @@ const envSchema = z.object({
   APP_VERSION: z.string().min(1).default("0.1.0"),
   LOG_LEVEL: z.enum(LOG_LEVELS).default("info"),
   DATABASE_URL: z.string().min(1).optional(),
+  /** Only set to "true" behind a reverse proxy that overwrites X-Forwarded-For. */
+  TRUST_PROXY: z.enum(["true", "false"]).default("false"),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
@@ -39,4 +41,9 @@ let cached: AppEnv | undefined;
 export function getEnv(): AppEnv {
   cached ??= parseEnv(process.env);
   return cached;
+}
+
+/** Cookies are marked Secure whenever the public origin uses HTTPS. */
+export function isSecureOrigin(env: AppEnv = getEnv()): boolean {
+  return env.APP_URL.startsWith("https://");
 }

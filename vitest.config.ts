@@ -1,6 +1,7 @@
 import path from "node:path";
 import { defineConfig } from "vitest/config";
 
+/** Unit tests: pure logic and HTTP helpers. No database or network. */
 export default defineConfig({
   resolve: {
     alias: {
@@ -9,15 +10,30 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["tests/**/*.test.ts"],
+    include: ["tests/unit/**/*.test.ts"],
+    env: { NODE_ENV: "test", LOG_LEVEL: "silent" },
     coverage: {
       provider: "v8",
-      include: ["src/server/**/*.ts", "src/shared/**/*.ts", "src/lib/**/*.ts"],
+      include: [
+        "src/server/modules/cart/pricing.ts",
+        "src/server/modules/cart/policy.ts",
+        "src/server/modules/auth/password.ts",
+        "src/server/modules/auth/schemas.ts",
+        "src/server/modules/checkout/checkout.schemas.ts",
+        "src/server/modules/cart/cart.schemas.ts",
+        "src/server/modules/catalog/catalog.schemas.ts",
+        "src/server/modules/catalog/catalog.service.ts",
+        "src/server/http/*.ts",
+        "src/server/security/*.ts",
+        "src/server/config/env.ts",
+        "src/server/logging/logger.ts",
+        "src/shared/*.ts",
+      ],
       thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 75,
-        statements: 80,
+        lines: 85,
+        functions: 85,
+        branches: 80,
+        statements: 85,
       },
     },
   },

@@ -178,7 +178,7 @@ contact_messages(id, name, email, message, created_at, ip_hash)
 audit_logs(id, actor_id FK NULL, action, entity, entity_id, metadata JSONB, created_at)
 ```
 
-Migrations are managed with Prisma Migrate. Seed data is generated from the existing `catalog.ts`, so the current 37 products carry over.
+Migrations are managed with Prisma Migrate. Seed data is generated from the existing `catalog.ts`, so the current 18 products (37 variants) carry over. The snapshot is `src/server/db/seed/catalog.seed.json`. The count of 37 that appeared in the Stage 1 proposal was the variant count, not the product count.
 
 ---
 
@@ -325,3 +325,66 @@ premium-clothing-brand-website/
 | D6  | Product photography                                                   | Replace Pexels stock images with brand photography before launch. Use placeholders until then.   |
 | D7  | Legal pages                                                           | Draft placeholder policies now. The business owner must review them before launch.               |
 | D8  | Licence for the repository                                            | Proprietary (all rights reserved) unless you choose otherwise.                                   |
+
+---
+
+## 10. Stage 3 implementation decisions
+
+These decisions were made while building the backend. Where the implementation differs from the target schema in §5, this section is authoritative. Stage 4 builds on these choices.
+
+### 10.1 Data and money
+
+- **Money** is stored as integer minor units (USD cents). The base currency is USD (D2). Multi-currency display is planned through server-side FX rates in the `regions` table.
+- **Shipping prices** in the seed are USD-base numbers, so each shipping method is stored as `price × 100` USD minor units. Region-specific pricing in local currency is not yet designed. This is an assumption to confirm before launch.
+- **Emails** are lowercased by the application before storage and lookup. The database does not use `citext`. Schemas normalise input with `toLowerCase()`.
+- **CHECK constraints** live in the migration `20261010072632_check_constraints`, not in the Prisma schema, because Prisma 7 cannot express them. The migration adds 7 constraints: non-negative product prices, variant stock, promo values and order amounts; positive cart and order-item quantities; and review ratings from 1 to 5.
+- **Enums** are uppercase in Prisma (`PENDING_PAYMENT`, `PAID`, …). The API returns them lowercase (`pending_payment`) through the DTO mappers. Clients never see the database spelling.
+- **Identifiers:** UUID primary keys. Catalogue variants are exposed by SKU in the API. Internal cart and order rows reference the variant UUID.
+
+### 10.2 Catalogue
+
+- **Pagination** uses opaque cursors that encode an offset (`base64url`), with a default page size of 24 and a maximum of 100. Keyset pagination is deferred until data volume requires it.
+- **Filters:** category, audience, style, size, colour, price range (major units), free-text search, and five sort keys.
+
+### 10.3 Bag (cart) and promotions
+
+- **Guest bag:** an opaque, random, httpOnly cookie `vellum_guest`, valid for 30 days. The server stores only its SHA-256 hash.
+- **Merge on sign-in:** guest lines move into the customer's cart, capped by live stock and the per-line maximum. A guest promo code and shipping choice carry over when the customer has none.
+- **Totals** are computed only on the server. The client sends variant SKUs, sizes, and quantities. Limits: 10 per size line, 30 distinct lines.
+- **Promo rules** come from the seed: WELCOME10 (10% off), CIRCLE15 (15% off, minimum $300), and FREESHIP (free shipping, minimum $150).
+- **Open point:** CIRCLE15 is described as a Circle members offer, but the schema has no membership concept, so any shopper can use it. A product decision is needed before launch.
+
+### 10.4 Checkout and orders
+
+- **Idempotency:** `POST /api/v1/checkout` requires an `Idempotency-Key` header (8–80 characters: letters, digits, `-`, `_`). The stored key is `sha256("<scope>|<key>")`, where scope is `user:<id>` or `guest:<tokenHash>`. The raw key is never stored. A repeat returns the original order with HTTP 200 and `replayed: true`.
+- **Stock:** reserved at order creation inside one transaction, using a conditional `UPDATE … WHERE stock >= quantity` per line. Under concurrency, exactly one of two competing checkouts for the last piece succeeds (covered by an integration test).
+- **Pricing at checkout:** recomputed from the database. The client's totals are never trusted.
+- **Order number:** `VLM-YYYYMMDD-XXXXXX`. The code is 6 characters from a 32-character alphabet with no `0`, `1`, `I`, or `O`. Since 256 is divisible by 32, there is no modulo bias.
+- **Unpaid stock release:** not implemented yet. An order in `PENDING_PAYMENT` keeps its reserved stock until a release job (a scheduled task) is built, so this is a known gap. It is tracked on the task board.
+- **Guest order access:** a guest reads an order only with the cookie that placed it. Other callers get a plain 404, so existence is not revealed.
+
+### 10.5 Authentication and sessions
+
+- **Passwords:** argon2id. Login runs a decoy verification when the email is unknown, so response timing does not reveal which accounts exist. Login and sign-up failures return the same message.
+- **Session:** the cookie `vellum_session` is httpOnly, `SameSite=Lax`, and valid for 7 days. Its token is 32 random bytes, and only the SHA-256 hash is stored.
+- **Rotation:** each sign-in issues a new token. The previous session, if any, is not revoked. Full rotation (revoking other sessions) comes with password reset.
+- **Rate limits:** login allows 10 attempts per IP and email pair per 15 minutes. Registration allows 5 per IP per hour. Limits apply only when `TRUST_PROXY=true`. Otherwise all clients share a single bucket.
+- **Account enumeration (decision for owner review):** a duplicate sign-up returns 409 with a generic message, but the status code still reveals that the email exists. The alternative is to return 201 and email the account holder. Choose before launch.
+
+### 10.6 Request security and errors
+
+- **CSRF:** double-submit token. The server sets the readable cookie `vellum_csrf` (`SameSite=Strict`, 7 days). Unsafe methods must echo it in the `x-csrf-token` header.
+- **Origin checks:** unsafe requests with an `Origin` header other than `APP_URL`, or with a cross-site `Sec-Fetch-Site`, are refused with 403.
+- **Errors:** every API error is RFC 9457 `application/problem+json`. Unexpected errors return a generic message and the request ID. Internal details are logged, never returned.
+- **Unknown API paths** return a 404 problem through a catch-all route, `src/app/api/[...slug]/route.ts`.
+- **Known gap:** a wrong HTTP method on an existing route (for example `POST /api/v1/categories`) still gets Next.js's default 405 response. Fixing it needs method-level middleware, which is planned for Stage 5.
+
+### 10.7 Tests
+
+- **Unit (59 → 101 tests):** pricing and promo rules, password hashing, environment parsing, HTTP core and the route pipeline, schemas, the catalogue service (fake repository), cookies, and client-IP parsing.
+- **Integration (47 tests):** run against a dedicated PostgreSQL database named `*_test`. The global setup refuses any database whose name lacks `test`, applies migrations, truncates, and reseeds. Coverage covers catalogue, auth, bag, checkout (idempotency and the concurrency race), orders (ownership), and platform endpoints.
+- **Coverage gate:** statements ≥ 85%, functions ≥ 85%, lines ≥ 85%, branches ≥ 80%. Measured over the pure and service modules listed in `vitest.config.ts`.
+
+### 10.8 Not yet built in Stage 3
+
+Password reset, role guards and the admin module, wishlist, reviews with moderation, newsletter (double opt-in), contact, payment adapter and webhook, the unpaid-order stock release job, and the looks, journal and size-guide endpoints. Each is a board item.
