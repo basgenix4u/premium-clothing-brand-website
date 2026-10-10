@@ -265,7 +265,7 @@ export async function seedCatalog(
     }
   }
 
-  for (const look of snapshot.looks) {
+  for (const [sortOrder, look] of snapshot.looks.entries()) {
     const data = {
       title: look.title,
       season: look.season,
@@ -273,6 +273,7 @@ export async function seedCatalog(
       copy: look.copy,
       styling: look.styling,
       items: look.items,
+      sortOrder,
     };
     await db.look.upsert({
       where: { slug: look.id },
@@ -281,7 +282,7 @@ export async function seedCatalog(
     });
   }
 
-  for (const article of snapshot.articles) {
+  for (const [sortOrder, article] of snapshot.articles.entries()) {
     const data = {
       title: article.title,
       kicker: article.kicker,
@@ -290,6 +291,7 @@ export async function seedCatalog(
       excerpt: article.excerpt,
       body: article.body,
       related: article.related,
+      sortOrder,
     };
     await db.article.upsert({
       where: { slug: article.slug },

@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiGet } from "@/lib/api-client";
+import type { CategoryDto } from "@/shared/catalog-dto";
 
-export type Category = { slug: string; name: string; blurb: string; imageUrl: string };
+export type Category = CategoryDto;
 
 export function useCategories() {
   return useQuery({

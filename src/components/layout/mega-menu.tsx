@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/icons";
+import { Photo } from "@/components/ui/photo";
 import { useCategories } from "@/features/catalog/use-categories";
 import { STYLES } from "@/features/catalog/styles";
 
@@ -79,9 +80,7 @@ export function MegaMenu({ onNavigate }: { onNavigate?: () => void }) {
         </div>
         <div className="mega-feature">
           {featured ? (
-            // The prototype's decorative image. Stage 4 self-hosts the photography (D6), so the lint exception is temporary.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={featured.imageUrl} alt="" loading="lazy" aria-hidden="true" />
+            <Photo src={featured.imageUrl} alt="" loading="lazy" aria-hidden="true" />
           ) : null}
           <div>
             <p className="mega-heading">The Fall Study</p>

@@ -6,12 +6,15 @@ import { AuthService } from "@/server/modules/auth/auth.service";
 import { CartRepository } from "@/server/modules/cart/cart.repository";
 import { CartService } from "@/server/modules/cart/cart.service";
 import { CheckoutService } from "@/server/modules/checkout/checkout.service";
+import { ContentRepository } from "@/server/modules/content/content.repository";
+import { ContentService } from "@/server/modules/content/content.service";
 import { OrdersService } from "@/server/modules/orders/orders.service";
 import { FixedWindowRateLimiter } from "@/server/http/rate-limit";
 
 export type Services = {
   db: Db;
   catalog: CatalogService;
+  content: ContentService;
   auth: AuthService;
   cart: CartService;
   cartRepository: CartRepository;
@@ -29,6 +32,7 @@ export function createServices(db: Db): Services {
   return {
     db,
     catalog: new CatalogService(new CatalogRepository(db)),
+    content: new ContentService(new ContentRepository(db)),
     auth: new AuthService({
       repository: authRepository,
       loginLimiter: new FixedWindowRateLimiter(10, FIFTEEN_MINUTES_MS),

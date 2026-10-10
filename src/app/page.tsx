@@ -1,12 +1,12 @@
+import type { Metadata } from "next";
+import { HomeView } from "@/components/home/home-view";
+
+export const metadata: Metadata = {
+  title: "Wear your next chapter",
+  description:
+    "Outerwear, tailoring, knitwear and denim, built as one wardrobe so every piece works with the last.",
+};
+
 export default function HomePage() {
-  return (
-    <main className="flex min-h-screen items-center justify-center p-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-semibold">Vellum</h1>
-        <p className="mt-3 text-neutral-600">
-          Storefront foundation is in place. Design port is in progress.
-        </p>
-      </div>
-    </main>
-  );
+  return <HomeView />;
 }

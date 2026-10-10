@@ -10,16 +10,9 @@ import {
   type ReactNode,
 } from "react";
 import { apiGet } from "@/lib/api-client";
+import type { RegionDto } from "@/shared/catalog-dto";
 
-export type Region = {
-  code: string;
-  label: string;
-  currency: string;
-  locale: string;
-  sizeSystem: string;
-  taxNote: string;
-  fxRate: number;
-};
+export type Region = RegionDto;
 
 const STORAGE_KEY = "vellum.region";
 const DEFAULT_CODE = "US";

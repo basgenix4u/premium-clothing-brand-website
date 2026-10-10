@@ -49,6 +49,11 @@ Done in this stage so far: Prisma schema, migrations, seed, readiness, CSRF and 
 - [ ] Role guards for admin routes (needs the admin module)
 - [x] Catalogue API: categories, products with filters, sort, search, and offset cursors
 - [x] Catalogue API: regions (`GET /api/v1/regions`, with the FX rate for display only)
+- [x] Catalogue API: product listings include variants (swatches, images, per-size stock)
+- [x] Content API: looks (`GET /api/v1/looks`), journal list and article (`GET /api/v1/journal`, `GET /api/v1/journal/{slug}`), ordered by a curated `sortOrder` (migration `content_sort_order`)
+- [ ] Reviews API (list approved reviews and their summary, submit review)
+- [ ] Newsletter API (subscribe with double opt-in, confirm)
+- [ ] Wishlist API (list, add, remove)
 - [ ] Catalogue API: looks, journal and size guides
 - [x] Bag API: guest cookie bag, server-side totals, promo validation, shipping selection, merge on sign-in
 - [x] Decision: CIRCLE15 is not seeded until a membership model exists (owner decision, ARCHITECTURE §10.3)
@@ -69,7 +74,7 @@ Done in this stage so far: Prisma schema, migrations, seed, readiness, CSRF and 
 ## Stage 4: Frontend
 
 - [x] Port the stylesheet from `legacy/vite-storefront/src/index.css` to `src/app/globals.css` (formatted only, no rule changes)
-- [~] Port the components, pages and copy from `legacy/vite-storefront/` to Next.js routes, keeping the current visual design. Done: shared UI (`src/components/ui/`), providers (TanStack Query, region, toasts), header with mega menu and mobile menu, footer, root layout with skip link. Left: search overlay (needs a catalogue search call), cart and wishlist drawers, product cards, home, shop, product, journal, lookbook, quiz and wishlist pages
+- [~] Port the components, pages and copy from `legacy/vite-storefront/` to Next.js routes, keeping the current visual design. Done: shared UI (`src/components/ui/`), providers (TanStack Query, region, toasts), header with mega menu and mobile menu, footer, root layout with skip link, product cards and quick view (add to bag through the API), and the home page. Home defers the reviews block, recently viewed, the manifesto outfit builder (comes with Discover), and newsletter submission (endpoint not built). Left: search overlay, cart and wishlist drawers, shop, product, journal, lookbook, quiz and wishlist pages
 - [ ] Replace hash routing with real URLs and metadata for SEO
 - [ ] Replace `catalog.ts` and `localStorage` state with API integration (TanStack Query)
 - [ ] Loading, empty and error states on every data view

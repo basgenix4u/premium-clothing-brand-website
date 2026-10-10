@@ -3812,6 +3812,7 @@ h2 em {
   grid-template-columns: repeat(6, 1fr);
   gap: 0.7rem;
 }
+.style-card a,
 .style-card button {
   display: flex;
   flex-direction: column;
@@ -3828,6 +3829,7 @@ h2 em {
     background-color 0.25s,
     transform 0.25s;
 }
+.style-card a,
 .style-card button:hover {
   border-color: var(--ink);
   background: rgba(251, 250, 247, 0.7);
@@ -3864,6 +3866,7 @@ h2 em {
   grid-template-columns: repeat(4, 1fr);
   gap: 1.2rem;
 }
+.category-card a,
 .category-card button {
   position: relative;
   display: block;
@@ -3879,6 +3882,7 @@ h2 em {
   object-fit: cover;
   transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
+.category-card a,
 .category-card button:hover img {
   transform: scale(1.05);
 }
@@ -3941,6 +3945,7 @@ h2 em {
   grid-template-columns: repeat(3, 1fr);
   gap: 1.2rem;
 }
+.home-review a,
 .home-review button {
   display: flex;
   align-items: center;
@@ -3954,6 +3959,7 @@ h2 em {
     border-color 0.2s,
     transform 0.2s;
 }
+.home-review a,
 .home-review button:hover {
   border-color: var(--ink);
   transform: translateY(-3px);
@@ -3992,6 +3998,7 @@ h2 em {
 .editorial-bestsellers li {
   border-bottom: 1px solid rgba(23, 23, 19, 0.18);
 }
+.editorial-bestsellers a,
 .editorial-bestsellers button {
   display: flex;
   align-items: center;
@@ -4654,6 +4661,7 @@ h2 em {
     gap: 1.1rem;
     margin-bottom: 1.9rem;
   }
+  .style-card a,
   .style-card button {
     padding: 0.9rem;
   }
@@ -4689,4 +4697,13 @@ h2 em {
     width: 15rem;
     right: -0.5rem;
   }
+}
+
+/* Card links reuse the button rules above. Anchors also need the text reset that buttons get by default. */
+.style-card a,
+.category-card a,
+.home-review a,
+.editorial-bestsellers a {
+  color: inherit;
+  text-decoration: none;
 }

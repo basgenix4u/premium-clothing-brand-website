@@ -10,12 +10,17 @@ export class ApiError extends Error {
 }
 
 const FALLBACK_MESSAGE = "Something went wrong. Please try again.";
+const CSRF_HEADER = "x-csrf-token";
+const CSRF_PATH = "/api/v1/security/csrf";
 
-/** Same-origin JSON GET. Relative URLs only, so the browser never targets another host. */
-export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
-  const init: RequestInit = { headers: { accept: "application/json" }, credentials: "same-origin" };
-  if (signal) init.signal = signal;
-  const response = await fetch(path, init);
+let csrfToken: string | undefined;
+
+async function request<T>(path: string, init: RequestInit): Promise<T> {
+  const response = await fetch(path, {
+    ...init,
+    headers: { accept: "application/json", ...init.headers },
+    credentials: "same-origin",
+  });
   if (!response.ok) {
     let detail: string | undefined;
     try {
@@ -27,4 +32,38 @@ export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> 
     throw new ApiError(response.status, detail ?? FALLBACK_MESSAGE);
   }
   return (await response.json()) as T;
+}
+
+/** Same-origin JSON GET. Relative URLs only, so the browser never targets another host. */
+export function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
+  return request<T>(path, signal ? { signal } : {});
+}
+
+async function getCsrfToken(refresh = false): Promise<string> {
+  if (!csrfToken || refresh) {
+    const body = await request<{ csrfToken: string }>(CSRF_PATH, { credentials: "same-origin" });
+    csrfToken = body.csrfToken;
+  }
+  return csrfToken;
+}
+
+/**
+ * Same-origin JSON POST with the double-submit CSRF header. One retry on a 403 covers a
+ * token that expired while the tab was open.
+ */
+export async function apiPost<T>(path: string, body: unknown): Promise<T> {
+  const send = async (token: string) =>
+    request<T>(path, {
+      method: "POST",
+      headers: { "content-type": "application/json", [CSRF_HEADER]: token },
+      body: JSON.stringify(body),
+    });
+  try {
+    return await send(await getCsrfToken());
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 403) {
+      return send(await getCsrfToken(true));
+    }
+    throw error;
+  }
 }

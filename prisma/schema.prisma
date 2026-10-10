@@ -246,6 +246,7 @@ model Look {
   styling     String   @db.Text
   items       Json
   publishedAt DateTime @map("published_at")
+  sortOrder   Int      @default(0) @map("sort_order")
 
   @@map("looks")
 }
@@ -261,6 +262,7 @@ model Article {
   body        String[]
   related     String[]
   publishedAt DateTime @map("published_at")
+  sortOrder   Int      @default(0) @map("sort_order")
 
   @@map("articles")
 }
