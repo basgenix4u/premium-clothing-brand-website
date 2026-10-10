@@ -57,6 +57,10 @@ export class CatalogRepository {
     return this.db.category.findMany({ orderBy: { sortOrder: "asc" } });
   }
 
+  listRegions() {
+    return this.db.region.findMany({ orderBy: { label: "asc" } });
+  }
+
   async listProducts(query: ProductQuery, offset: number): Promise<ProductRecord[]> {
     return this.db.product.findMany({
       where: buildProductWhere(query),

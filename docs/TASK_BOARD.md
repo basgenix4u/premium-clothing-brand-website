@@ -2,7 +2,7 @@
 
 Legend: `[ ]` Pending · `[~]` In Progress (only one at a time) · `[x]` Completed
 
-Current stage: **Stage 4 — Frontend (in progress)**. Stage 3 is approved. The stylesheet is ported; components and pages are next.
+Current stage: **Stage 4 — Frontend (in progress)**. Stage 3 is approved. The stylesheet, shared UI, shell (header, footer, layout) and TanStack Query providers are ported. Pages and drawers are next.
 
 ## Stage 0: Repository and baseline
 
@@ -48,6 +48,7 @@ Done in this stage so far: Prisma schema, migrations, seed, readiness, CSRF and 
 - [x] Ownership checks on carts and orders (guest cookie or signed-in user only)
 - [ ] Role guards for admin routes (needs the admin module)
 - [x] Catalogue API: categories, products with filters, sort, search, and offset cursors
+- [x] Catalogue API: regions (`GET /api/v1/regions`, with the FX rate for display only)
 - [ ] Catalogue API: looks, journal and size guides
 - [x] Bag API: guest cookie bag, server-side totals, promo validation, shipping selection, merge on sign-in
 - [x] Decision: CIRCLE15 is not seeded until a membership model exists (owner decision, ARCHITECTURE §10.3)
@@ -68,7 +69,7 @@ Done in this stage so far: Prisma schema, migrations, seed, readiness, CSRF and 
 ## Stage 4: Frontend
 
 - [x] Port the stylesheet from `legacy/vite-storefront/src/index.css` to `src/app/globals.css` (formatted only, no rule changes)
-- [~] Port the components, pages and copy (header, cart and wishlist drawers, product cards, home, shop, product, journal, lookbook, quiz, wishlist) from `legacy/vite-storefront/` to Next.js routes, keeping the current visual design
+- [~] Port the components, pages and copy from `legacy/vite-storefront/` to Next.js routes, keeping the current visual design. Done: shared UI (`src/components/ui/`), providers (TanStack Query, region, toasts), header with mega menu and mobile menu, footer, root layout with skip link. Left: search overlay (needs a catalogue search call), cart and wishlist drawers, product cards, home, shop, product, journal, lookbook, quiz and wishlist pages
 - [ ] Replace hash routing with real URLs and metadata for SEO
 - [ ] Replace `catalog.ts` and `localStorage` state with API integration (TanStack Query)
 - [ ] Loading, empty and error states on every data view

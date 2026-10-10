@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import * as categoriesRoute from "@/app/api/v1/categories/route";
 import * as productsRoute from "@/app/api/v1/products/route";
+import * as regionsRoute from "@/app/api/v1/regions/route";
 import * as productRoute from "@/app/api/v1/products/[slug]/route";
 import * as csrfRoute from "@/app/api/v1/security/csrf/route";
 import { ApiClient, json } from "./helpers";
@@ -28,6 +29,29 @@ describe("GET /api/v1/categories", () => {
       "denim",
       "accessories",
     ]);
+  });
+});
+
+describe("GET /api/v1/regions", () => {
+  it("lists the six storefront regions with their display currency and FX rate", async () => {
+    const response = await client.send(regionsRoute.GET, { path: "/api/v1/regions" });
+    expect(response.status).toBe(200);
+    const body = await json<{ items: { code: string; currency: string; fxRate: number }[] }>(
+      response,
+    );
+    expect(body.items.map((region) => region.code).sort()).toEqual([
+      "AU",
+      "CA",
+      "EU",
+      "GB",
+      "JP",
+      "US",
+    ]);
+    const us = body.items.find((region) => region.code === "US");
+    expect(us).toMatchObject({ currency: "USD", fxRate: 1 });
+    expect(
+      body.items.every((region) => typeof region.fxRate === "number" && region.fxRate > 0),
+    ).toBe(true);
   });
 });
 

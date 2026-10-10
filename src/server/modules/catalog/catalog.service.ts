@@ -34,6 +34,20 @@ export class CatalogService {
     }));
   }
 
+  /** Regions for the storefront picker. Prices stay in USD; `fxRate` is applied for display only. */
+  async listRegions() {
+    const regions = await this.repository.listRegions();
+    return regions.map((region) => ({
+      code: region.code,
+      label: region.label,
+      currency: region.currency,
+      locale: region.locale,
+      sizeSystem: region.sizeSystem,
+      taxNote: region.taxNote,
+      fxRate: region.fxRate.toNumber(),
+    }));
+  }
+
   async listProducts(query: ProductQuery): Promise<ProductPage> {
     const offset = decodeCursor(query.cursor);
     const rows = await this.repository.listProducts(query, offset);
