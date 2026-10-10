@@ -2,7 +2,7 @@
 
 Legend: `[ ]` Pending · `[~]` In Progress (only one at a time) · `[x]` Completed
 
-Current stage: **Stage 4 — Frontend (started)**. Stage 3 is approved.
+Current stage: **Stage 4 — Frontend (in progress)**. Stage 3 is approved. The stylesheet is ported; components and pages are next.
 
 ## Stage 0: Repository and baseline
 
@@ -67,7 +67,8 @@ Done in this stage so far: Prisma schema, migrations, seed, readiness, CSRF and 
 
 ## Stage 4: Frontend
 
-- [ ] Port the existing UI components, CSS and copy from `legacy/vite-storefront/` to Next.js routes, keeping the current visual design
+- [x] Port the stylesheet from `legacy/vite-storefront/src/index.css` to `src/app/globals.css` (formatted only, no rule changes)
+- [~] Port the components, pages and copy (header, cart and wishlist drawers, product cards, home, shop, product, journal, lookbook, quiz, wishlist) from `legacy/vite-storefront/` to Next.js routes, keeping the current visual design
 - [ ] Replace hash routing with real URLs and metadata for SEO
 - [ ] Replace `catalog.ts` and `localStorage` state with API integration (TanStack Query)
 - [ ] Loading, empty and error states on every data view
